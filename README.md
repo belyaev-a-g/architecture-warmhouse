@@ -53,6 +53,7 @@
 
 Чтобы добавить ссылку в файл Readme.md, нужно использовать синтаксис Markdown. Это делают так:
 
+[Диаграмма контекста Тёплый дом(as_is)](./schemas/context_as_is.png)
 ```markdown
 [Диаграмма контекста Тёплый дом(as_is)](./schemas/context_as_is.png)
 ```
