@@ -1,0 +1,81 @@
+@startuml
+!include ../C4/C4_Component.puml
+!include ../C4/C4_Container.puml
+
+Title "Тёплый дом. To be. Диаграмма контейнеров"
+Person(User, "Пользователь", "Пользователь системы")
+Person(Administator, "Администратор", "Администратор системы")
+System_Boundary(warmHouse, "Система 'Тёплый дом'") {
+Container(MobileApp, "Мобильное приложение", "Android/iOS", "Система удаленного управления теплым домом")
+Container(WebSite, "Вебсайт", "React", "Система удаленного управления теплым домом")
+
+Boundary(BackendApi, "Backend services") {
+Boundary(bff, "Backend for frontend") {
+  Container(BFF_WebSite, "Бекэнд для сайта", "Go")
+  Container(BFF_MobileApp, "Бекэнд для мобильного приложения", "Go")
+}
+  Container(TelemetryView, "Телеметрия", "Go", "Просмотр текущей телеметрии и истории")
+  ContainerDb(Database, "База данных личного кабинета", "PostgreSQL", "Хранение пользовательской регистрационной информации, журналы, показания датчиков")
+  ContainerDb(DatabaseTelemetry, "База данных телеметрии", "PostgreSQL", "Хранение данных телеметрии")
+  ContainerDb(DatabaseTelemetryCache, "Кэш телеметрии", "Redis", "Кэш для быстрого доступа данным телеметрии")
+  Container(DatabaseVideoMetadata, "База данных с метаданными видеофайлов", "PostgreSQL", "Хранение метаданных видеофайлов")
+  Container(S3Storage, "S3-хранилище для видеофайлов", "S3", "Хранение видеофайлов")
+  Container(VideoHosting, "Видеонаблюдение", "Go", "Просмотр видео с камер пользователя")
+  Container(Accounts, "Личный кабинет", "Go", "Управляет регистрацией, аутентификацией и данными пользователя. Подписка и платежи.")
+  Container(Scenario, "Сервис управления сценариями", "Go", "")
+  ContainerDb(ScenarioDb, "База данных сервисa управления сценариями", "PostgreSQL", "Хранит пользовательские сценарии, а также команды отправляемые на управление устройствами")
+  Container(Notification, "Сервис уведомлений", "Go", "PUSH/SMS/E-MAIL уведомления")
+  ContainerDb(NotificationDb, "База данных сервиса уведомлений", "PostgreSQL", "Хранит подписки на PUSH/SMS/E-MAIL уведомления")
+  ContainerQueue(IoTBroker, "Сервис обмена с устройствами IoT", "Обмен данными с IoT", "HiveMQ")
+  ContainerQueue(Kafka, "Сервис обмена данными", "Обмен данными", "Kafka")
+  Container(StreamManager, "Сервис получения данных с видеокамер", "Получение видеопотока", "")
+  Container(DeviceMessaging, "Сервис работы с устройствами IoT", "Python", "Передает и получает данные из MQTT топиков, перенаправляет трафик с устройств на Kafka. Подключение и настройка устройств")
+  Container(PaymentService, "Платёжный сервис", "Go", "Управление оплатой, тарифами, подписками")
+  ContainerDb(PaymentDb, "База данных платёжного сервиса", "PostgreSQL", "Хранит информацию об оплате, тарифах, подписках")
+}
+
+System_Ext(SmsGate, "Система SMS информирования", "Система SMS оповещения")
+System_Ext(EmailGateway, "Система E-mail информирования", "Система оповещения по e-mail")
+System_Ext(PaySystem, "Платежная система", "Обрабатывает платежные транзакции")
+System_Ext(IoTDevices, "Устройства/Датчики", "IoT устройства умного дома")
+System_Ext(Cameras, "Камеры", "Видеопоток")
+}
+
+Rel(Notification, NotificationDb, "Запросы")
+Rel(IoTBroker, DeviceMessaging, "Данные с устройств")
+Rel(DeviceMessaging,IoTBroker, "Данные на устройства")
+Rel(DeviceMessaging, Kafka, "Данные с устройств", "Производитель")
+Rel(Kafka, DeviceMessaging, "Данные на устройства", "Потребитель")
+Rel(Scenario, Kafka, "Данные c устройств, телеметрия", "Потребитель")
+Rel(Scenario, Kafka, "Команды на устройствa", "Производитель")
+Rel(StreamManager, Kafka, "Видеопоток", "Производитель")
+Rel(VideoHosting, Kafka, "Видеопоток", "Потребитель")
+Rel(TelemetryView, Kafka, "Телеметрия", "Потребитель")
+Rel(Cameras, StreamManager, "Видеопоток", "RTSP, WebRTC")
+Rel(IoTDevices, IoTBroker, "Sets/Gets", "TCP/IP")
+Rel(IoTBroker, IoTDevices, "Sets/Gets", "TCP/IP")
+Rel(TelemetryView, DatabaseTelemetryCache, "Sets/Gets", "TCP/IP")
+Rel(VideoHosting, S3Storage, "Хранение и запрос к видео")
+Rel(VideoHosting, DatabaseVideoMetadata, "Хранение и запрос к видео")
+Rel(Administator, MobileApp, "Заходит в административную панель", "HTTPS")
+Rel(Administator, WebSite, "Заходит в административную панель", "HTTPS")
+Rel(User, MobileApp, "Заходит в личный кабинет", "HTTPS")
+Rel(User, WebSite, "Заходит в личный кабинет", "HTTPS")
+Rel(Scenario, Notification, "Отправить уведомление")
+Rel(Scenario, ScenarioDb, "Запросы")
+Rel(Notification, SmsGate, "SMS информирование")
+Rel(Notification, EmailGateway, "E-mail информирование")
+Rel(TelemetryView, DatabaseTelemetry, "Запросы")
+Rel(MobileApp, BFF_MobileApp, "")
+Rel(WebSite, BFF_WebSite, "")
+Rel(bff, Accounts, "Управление личным кабинетом")
+Rel(Accounts, PaymentService, "Платёжные транзакции")
+Rel(bff, VideoHosting, "Наблюдение за домом")
+Rel(bff, Scenario, "Управление сценариями")
+Rel(bff, TelemetryView, "Получение данных о телеметрии")
+Rel(PaymentService, PaySystem, "Оплата подписки")
+Rel(PaymentService, PaymentDb, "Хранение истории")
+Rel(Accounts, Database, "Хранение данных личного кабинета")
+
+
+@enduml
