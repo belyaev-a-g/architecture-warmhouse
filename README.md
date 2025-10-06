@@ -57,6 +57,8 @@
 
 **Диаграмма контейнеров (Containers)**
 
+[Диаграмма контейнеров Тёплый дом(to_be)](./diagrams/container/WarmHouse_Container_to_be.png)
+
 Добавьте диаграмму.
 
 **Диаграмма компонентов (Components)**
