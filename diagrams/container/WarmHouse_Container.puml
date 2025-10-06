@@ -27,7 +27,7 @@ Boundary(bff, "Backend for frontend") {
   Container(Notification, "Сервис уведомлений", "Go", "PUSH/SMS/E-MAIL уведомления")
   ContainerDb(NotificationDb, "База данных сервиса уведомлений", "PostgreSQL", "Хранит подписки на PUSH/SMS/E-MAIL уведомления")
   ContainerQueue(IoTBroker, "Сервис обмена с устройствами IoT", "Обмен данными с IoT", "HiveMQ")
-  ContainerQueue(Kafka, "Сервис обмена данными", "Обмен данными", "Kafka")
+  ContainerQueue(Kafka, "Сервис обмена данными", "Kafka", "Обмен данными с IoT, видео, командами между сервисами")
   Container(StreamManager, "Сервис получения данных с видеокамер", "Получение видеопотока", "")
   Container(DeviceMessaging, "Сервис работы с устройствами IoT", "Python", "Передает и получает данные из MQTT топиков, перенаправляет трафик с устройств на Kafka. Подключение и настройка устройств")
   Container(PaymentService, "Платёжный сервис", "Go", "Управление оплатой, тарифами, подписками")
