@@ -57,15 +57,15 @@
 
 **Диаграмма контейнеров (Containers)**
 
-[Диаграмма контейнеров Тёплый дом(to_be)](./diagrams/container/WarmHouse_Container_to_be.png)
+[Диаграмма контейнеров "Тёплый дом(to_be)"](./diagrams/container/WarmHouse_Container_to_be.png)
 
 **Диаграмма компонентов (Components)**
 
-[Диаграмма компонента_личный_кабинет](./diagrams/component/WarmHouse_Component_PersonalAccount.png)
+[Диаграмма компонента "личный кабинет"](./diagrams/component/WarmHouse_Component_PersonalAccount.png)
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+[Диаграмма кода компонента "тарифы"](./diagrams/code/WarmHouse_Code_Tariffs.png)
 
 # Задание 3. Разработка ER-диаграммы
 
