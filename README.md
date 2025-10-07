@@ -59,11 +59,9 @@
 
 [Диаграмма контейнеров Тёплый дом(to_be)](./diagrams/container/WarmHouse_Container_to_be.png)
 
-Добавьте диаграмму.
-
 **Диаграмма компонентов (Components)**
 
-Добавьте диаграмму для каждого из выделенных микросервисов.
+[Диаграмма компонента_личный_кабинет](./diagrams/component/WarmHouse_Component_PersonalAccount.png)
 
 **Диаграмма кода (Code)**
 
