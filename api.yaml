@@ -1,0 +1,693 @@
+openapi: 3.0.4
+info:
+  title: User Service API
+  description: |
+    API для управления пользователями, аутентификацией и подписками в системе "Тёплый дом".
+    Включает функции регистрации, входа, управления профилями и SaaS подписками.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Warmhouse server
+
+security:
+  - BearerAuth: []
+
+paths:
+# House endpoints
+  /house/register:
+    post:
+      tags:
+        - House
+      summary: Регистрация нового дома
+      description: |
+        Создание записи о доме
+      operationId: HouseRequest
+      security: []
+      requestBody:
+        required: true
+        description: Данные для регистрации пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseRequest'
+            examples:
+              basic:
+                summary: Регистрация дома
+                value:
+                  name: "Государственный академический театр имени Евгения Вахтангова"
+                  populated_area: "г. Москва"
+                  street: "улица Арбат"
+                  number: "26"
+      responses:
+        '201':
+          description: Дом успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  summary: Успешная регистрация
+                  value:
+                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    expiresIn: 3600
+                    tokenType: "Bearer"
+                    user:
+                      id: "123e4567-e89b-12d3-a456-426614174000"
+                      email: "user@example.com"
+                      firstName: "Иван"
+                      lastName: "Петров"
+                      role: "user"
+                      
+  # Authentication endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Регистрация нового пользователя
+      description: |
+        Создание новой учетной записи пользователя в системе.
+        После успешной регистрации возвращаются JWT токены для аутентификации.
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        description: Данные для регистрации пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              basic:
+                summary: Базовая регистрация
+                value:
+                  email: "user@example.com"
+                  password: "SecurePassword123!"
+                  firstName: "Иван"
+                  lastName: "Петров"
+              withPhone:
+                summary: Регистрация с телефоном
+                value:
+                  email: "user@example.com"
+                  password: "SecurePassword123!"
+                  firstName: "Мария"
+                  lastName: "Иванова"
+                  phone: "+79991234567"
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  summary: Успешная регистрация
+                  value:
+                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    expiresIn: 3600
+                    tokenType: "Bearer"
+                    user:
+                      id: "123e4567-e89b-12d3-a456-426614174000"
+                      email: "user@example.com"
+                      firstName: "Иван"
+                      lastName: "Петров"
+                      role: "user"
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidEmail:
+                  summary: Некорректный email
+                  value:
+                    error: "Bad Request"
+                    message: "Invalid email format"
+                    code: 400
+                weakPassword:
+                  summary: Слабый пароль
+                  value:
+                    error: "Bad Request"
+                    message: "Password must be at least 8 characters and contain uppercase, lowercase, and numbers"
+                    code: 400
+        '409':
+          description: Пользователь уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emailExists:
+                  summary: Email уже зарегистрирован
+                  value:
+                    error: "Conflict"
+                    message: "User with this email already exists"
+                    code: 409
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal Server Error"
+                    message: "Failed to create user account"
+                    code: 500
+        
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Вход в систему
+      description: |
+        Аутентификация пользователя по email и паролю.
+        При успешном входе возвращаются JWT токены (access и refresh).
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        description: Учетные данные пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              standard:
+                summary: Стандартный вход
+                value:
+                  email: "user@example.com"
+                  password: "SecurePassword123!"
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  summary: Успешная аутентификация
+                  value:
+                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    expiresIn: 3600
+                    tokenType: "Bearer"
+                    user:
+                      id: "123e4567-e89b-12d3-a456-426614174000"
+                      email: "user@example.com"
+                      firstName: "Иван"
+                      lastName: "Петров"
+                      role: "user"
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingFields:
+                  summary: Отсутствуют обязательные поля
+                  value:
+                    error: "Bad Request"
+                    message: "Email and password are required"
+                    code: 400
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Неверный email или пароль
+                  value:
+                    error: "Unauthorized"
+                    message: "Invalid email or password"
+                    code: 401
+                accountLocked:
+                  summary: Аккаунт заблокирован
+                  value:
+                    error: "Unauthorized"
+                    message: "Account is locked due to multiple failed login attempts"
+                    code: 401
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal Server Error"
+                    message: "Authentication service temporarily unavailable"
+                    code: 500
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Выход из системы
+      operationId: logoutUser
+      responses:
+        '200':
+          description: Успешный выход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Обновление JWT токена
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Токен обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  # User management endpoints
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Получить профиль текущего пользователя
+      operationId: getCurrentUserProfile
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Users
+      summary: Обновить профиль пользователя
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: Профиль обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Получить пользователя по ID (только для админов)
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '403':
+          description: Недостаточно прав
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Subscription management endpoints
+  /subscriptions:
+    get:
+      tags:
+        - Subscriptions
+      summary: Получить подписки пользователя
+      operationId: getUserSubscriptions
+      responses:
+        '200':
+          description: Список подписок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+
+    post:
+      tags:
+        - Subscriptions
+      summary: Создать новую подписку
+      operationId: createSubscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /subscriptions/{subscriptionId}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Получить подписку по ID
+      operationId: getSubscriptionById
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Данные подписки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Подписка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Subscriptions
+      summary: Обновить подписку
+      operationId: updateSubscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Подписка обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+
+    delete:
+      tags:
+        - Subscriptions
+      summary: Отменить подписку
+      operationId: cancelSubscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Подписка отменена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HouseRequest:
+      type: object
+      required:
+        - name
+        - populated_area
+        - street
+        - number
+      properties:
+        name:
+          type: string
+          example: "Дом милый дом"
+        populated_area:
+          type: string
+          example: "г. Санкт-Петербург"
+        street:
+          type: string
+          example: "Невский проспект"
+        number:
+          type: integer
+          example: "5"
+          
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          minLength: 8
+          example: "securePassword123"
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "+7 (999) 123-45-67"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          example: "securePassword123"
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "+7 (999) 123-45-67"
+        role:
+          type: string
+          enum: [user, admin]
+          example: "user"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "+7 (999) 123-45-67"
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        plan:
+          type: string
+          enum: [basic, premium, enterprise]
+          example: "premium"
+        status:
+          type: string
+          enum: [active, inactive, canceled, expired]
+          example: "active"
+        startedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2024-12-15T10:30:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - plan
+      properties:
+        plan:
+          type: string
+          enum: [basic, premium, enterprise]
+          example: "premium"
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [basic, premium, enterprise]
+          example: "premium"
+        status:
+          type: string
+          enum: [active, inactive, canceled]
+          example: "active"
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid request"
+        message:
+          type: string
+          example: "The provided data is invalid"
+        code:
+          type: integer
+          example: 400
