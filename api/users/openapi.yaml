@@ -35,32 +35,132 @@ paths:
               basic:
                 summary: Регистрация дома
                 value:
-                  name: "Государственный академический театр имени Евгения Вахтангова"
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  name: "ЖК Современный"
                   populated_area: "г. Москва"
-                  street: "улица Арбат"
-                  number: "26"
+                  street: "ул. Ленина"
+                  number: "15"
       responses:
         '201':
           description: Дом успешно зарегистрирован
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/HouseResponse'
+
+  /house/{houseId}:
+    get:
+      tags:
+        - House
+      summary: Получить данные о доме
+      description: |
+        Получить данные о доме по id
+      operationId: HouseGet
+      parameters:
+        - name: houseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+                  
+      responses:
+        '200':
+          description: Данные о доме получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseResponse'
+        '404':
+          description: 'Resource not found'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
               examples:
-                success:
-                  summary: Успешная регистрация
+                serverError:
                   value:
-                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    expiresIn: 3600
-                    tokenType: "Bearer"
-                    user:
-                      id: "123e4567-e89b-12d3-a456-426614174000"
-                      email: "user@example.com"
-                      firstName: "Иван"
-                      lastName: "Петров"
-                      role: "user"
-                      
+                    error: "Internal Server Error"
+                    message: "Failed to get house info"
+                    code: 500  
+                
+  /house/delete/{houseId}:
+    delete:
+      tags:
+        - House
+      summary: Удалить данные о доме
+      description: |
+        Удалить данные о доме по id
+      operationId: HouseDelete
+      parameters:
+        - name: houseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+                  
+      responses:
+        '204':
+          description: 'Данные о доме удалены'
+        '404':
+          description: 'Resource not found'
+        '500':
+          description: 'Внутренняя ошибка сервера'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal Server Error"
+                    message: "Failed to delete house"
+                    code: 500               
+
+  /house/user/{userId}:
+    get:
+      tags:
+        - House
+      summary: Получить список домов для пользователя
+      description: |
+        Получить список домов для пользователя
+      operationId: HouseListGet
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+                  
+      responses:
+        '200':
+          description: Дом успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HouseResponse'                              
+        '404':
+          description: 'Resource not found'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal Server Error"
+                    message: "Failed to get houses by userid"
+                    code: 500
+
+
   # Authentication endpoints
   /auth/register:
     post:
@@ -83,18 +183,13 @@ paths:
               basic:
                 summary: Базовая регистрация
                 value:
-                  email: "user@example.com"
-                  password: "SecurePassword123!"
-                  firstName: "Иван"
-                  lastName: "Петров"
-              withPhone:
-                summary: Регистрация с телефоном
-                value:
-                  email: "user@example.com"
-                  password: "SecurePassword123!"
-                  firstName: "Мария"
-                  lastName: "Иванова"
-                  phone: "+79991234567"
+                  login: "vip_client"
+                  email: "client@example.org"
+                  password: "MySecurePass456!"
+                  firstName: "Алексей"
+                  lastName: "Сидоров"
+                  phone: "+79998765432"
+                  
       responses:
         '201':
           description: Пользователь успешно зарегистрирован
@@ -106,15 +201,17 @@ paths:
                 success:
                   summary: Успешная регистрация
                   value:
-                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    refreshToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
                     expiresIn: 3600
                     tokenType: "Bearer"
                     user:
-                      id: "123e4567-e89b-12d3-a456-426614174000"
-                      email: "user@example.com"
-                      firstName: "Иван"
-                      lastName: "Петров"
+                      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                      login: "vip_client"
+                      phone: "+79998765432"
+                      email: "client@example.org"
+                      firstName: "Алексей"
+                      lastName: "Сидоров"
                       role: "user"
         '400':
           description: Некорректные данные
@@ -162,15 +259,15 @@ paths:
                     code: 500
         
 
-  /auth/login:
+  /auth/login/login_by_email:
     post:
       tags:
         - Authentication
-      summary: Вход в систему
+      summary: Вход в систему по email
       description: |
         Аутентификация пользователя по email и паролю.
         При успешном входе возвращаются JWT токены (access и refresh).
-      operationId: loginUser
+      operationId: loginUserByEmail
       security: []
       requestBody:
         required: true
@@ -183,8 +280,8 @@ paths:
               standard:
                 summary: Стандартный вход
                 value:
-                  email: "user@example.com"
-                  password: "SecurePassword123!"
+                  email: "client@example.org"
+                  password: "MySecurePass456!"
       responses:
         '200':
           description: Успешный вход
@@ -196,15 +293,199 @@ paths:
                 success:
                   summary: Успешная аутентификация
                   value:
-                    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    refreshToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
                     expiresIn: 3600
                     tokenType: "Bearer"
                     user:
-                      id: "123e4567-e89b-12d3-a456-426614174000"
-                      email: "user@example.com"
-                      firstName: "Иван"
-                      lastName: "Петров"
+                      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                      login: "vip_client"
+                      phone: "+79998765432"
+                      email: "client@example.org"
+                      firstName: "Алексей"
+                      lastName: "Сидоров"
+                      role: "user"
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingFields:
+                  summary: Отсутствуют обязательные поля
+                  value:
+                    error: "Bad Request"
+                    message: "Email and password are required"
+                    code: 400
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Неверный email или пароль
+                  value:
+                    error: "Unauthorized"
+                    message: "Invalid email or password"
+                    code: 401
+                accountLocked:
+                  summary: Аккаунт заблокирован
+                  value:
+                    error: "Unauthorized"
+                    message: "Account is locked due to multiple failed login attempts"
+                    code: 401
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal Server Error"
+                    message: "Authentication service temporarily unavailable"
+                    code: 500
+                    
+  
+  /auth/login/login_by_phone_number:
+    post:
+      tags:
+        - Authentication
+      summary: Вход в систему по телефонному номеру
+      description: |
+        Аутентификация пользователя по телефонному номеру и паролю.
+        При успешном входе возвращаются JWT токены (access и refresh).
+      operationId: loginUserByPhoneNumber
+      security: []
+      requestBody:
+        required: true
+        description: Учетные данные пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              standard:
+                summary: Стандартный вход
+                value:
+                  phone: "+79998765432"
+                  password: "MySecurePass456!"
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  summary: Успешная аутентификация
+                  value:
+                    accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    refreshToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    expiresIn: 3600
+                    tokenType: "Bearer"
+                    user:
+                      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                      login: "vip_client"
+                      phone: "+79998765432"
+                      email: "client@example.org"
+                      firstName: "Алексей"
+                      lastName: "Сидоров"
+                      role: "user"
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingFields:
+                  summary: Отсутствуют обязательные поля
+                  value:
+                    error: "Bad Request"
+                    message: "Email and password are required"
+                    code: 400
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Неверный email или пароль
+                  value:
+                    error: "Unauthorized"
+                    message: "Invalid email or password"
+                    code: 401
+                accountLocked:
+                  summary: Аккаунт заблокирован
+                  value:
+                    error: "Unauthorized"
+                    message: "Account is locked due to multiple failed login attempts"
+                    code: 401
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal Server Error"
+                    message: "Authentication service temporarily unavailable"
+                    code: 500
+  
+  /auth/login/login_by_name:
+    post:
+      tags:
+        - Authentication
+      summary: Вход в систему по имени
+      description: |
+        Аутентификация пользователя по логину и паролю.
+        При успешном входе возвращаются JWT токены (access и refresh).
+      operationId: loginUserByLogin
+      security: []
+      requestBody:
+        required: true
+        description: Учетные данные пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              standard:
+                summary: Стандартный вход
+                value:
+                  login: "vip_client"
+                  password: "MySecurePass456!"
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  summary: Успешная аутентификация
+                  value:
+                    accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    refreshToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    expiresIn: 3600
+                    tokenType: "Bearer"
+                    user:
+                      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                      login: "vip_client"
+                      email: "client@example.org"
+                      firstName: "Алексей"
+                      lastName: "Сидоров"
                       role: "user"
         '400':
           description: Некорректные данные запроса
@@ -487,6 +768,16 @@ components:
       bearerFormat: JWT
 
   schemas:
+    HouseRequestId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          
     HouseRequest:
       type: object
       required:
@@ -497,42 +788,47 @@ components:
       properties:
         name:
           type: string
-          example: "Дом милый дом"
+          example: "ЖК Современный"
         populated_area:
           type: string
           example: "г. Санкт-Петербург"
         street:
           type: string
-          example: "Невский проспект"
+          example: "ул. Центральная"
         number:
           type: integer
-          example: "5"
+          example: "10"
           
     RegisterRequest:
       type: object
       required:
+        - login
         - email
         - password
         - firstName
         - lastName
       properties:
+        login:
+          type: string
+          format: string
+          example: "vip_client"
         email:
           type: string
           format: email
-          example: "user@example.com"
+          example: "client@example.org"
         password:
           type: string
           minLength: 8
-          example: "securePassword123"
+          example: "securePass123"
         firstName:
           type: string
-          example: "Иван"
+          example: "Алексей"
         lastName:
           type: string
-          example: "Иванов"
+          example: "Сидоров"
         phone:
           type: string
-          example: "+7 (999) 123-45-67"
+          example: "+7 (999) 876-54-32"
 
     LoginRequest:
       type: object
@@ -543,10 +839,10 @@ components:
         email:
           type: string
           format: email
-          example: "user@example.com"
+          example: "client@example.org"
         password:
           type: string
-          example: "securePassword123"
+          example: "securePass123"
 
     RefreshTokenRequest:
       type: object
@@ -555,17 +851,41 @@ components:
       properties:
         refreshToken:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+
+    HouseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        user_id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          example: "Милый дом"
+        populated_area:
+          type: string
+          example: "г. Киров"
+        street:
+          type: string
+          example: "ул. Лесная"
+        number:
+          type: integer
+          example: 15
 
     AuthResponse:
       type: object
       properties:
         accessToken:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
         refreshToken:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
         expiresIn:
           type: integer
           example: 3600
@@ -578,20 +898,20 @@ components:
         id:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
         email:
           type: string
           format: email
-          example: "user@example.com"
+          example: "client@example.org"
         firstName:
           type: string
-          example: "Иван"
+          example: "Алексей"
         lastName:
           type: string
-          example: "Иванов"
+          example: "Сидоров"
         phone:
           type: string
-          example: "+7 (999) 123-45-67"
+          example: "+7 (999) 876-54-32"
         role:
           type: string
           enum: [user, admin]
@@ -610,13 +930,13 @@ components:
       properties:
         firstName:
           type: string
-          example: "Иван"
+          example: "Алексей"
         lastName:
           type: string
-          example: "Иванов"
+          example: "Сидоров"
         phone:
           type: string
-          example: "+7 (999) 123-45-67"
+          example: "+7 (999) 876-54-32"
 
     Subscription:
       type: object
@@ -624,11 +944,11 @@ components:
         id:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
         userId:
           type: string
           format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
         plan:
           type: string
           enum: [basic, premium, enterprise]
