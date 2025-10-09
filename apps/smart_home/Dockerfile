@@ -7,6 +7,18 @@ WORKDIR /app
 # Copy go.mod and go.sum files
 COPY go.mod go.sum ./
 
+# Set proxy
+#RUN go env -w GOPROXY="http://172.16.0.250:4343"
+# Прокси для HTTP/HTTPS
+ENV HTTP_PROXY=http://172.16.0.250:4343
+ENV HTTPS_PROXY=http://172.16.0.250:4343
+
+# Прокси для Go modules
+ENV GOPROXY=https://proxy.golang.org,direct
+
+# Отключение проверки сертификатов (если прокси использует самоподписанные сертификаты)
+ENV GIT_SSL_NO_VERIFY=1
+
 # Download dependencies
 RUN go mod download
 
@@ -18,6 +30,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o smarthome
 
 # Runtime stage
 FROM alpine:latest
+
+ENV HTTP_PROXY=http://172.16.0.250:4343
+ENV HTTPS_PROXY=http://172.16.0.250:4343
 
 # Install necessary runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata
