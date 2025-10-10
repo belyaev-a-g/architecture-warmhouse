@@ -1,0 +1,48 @@
+@startuml
+package "tariffs" {
+    class Tariff {
+      + List<Device> devices
+      + List<Camera> cameras
+      + Boolean smsServiceEnabled
+      + Boolean videoServiceEnabled
+    }
+
+    class Subscription {
+      + Date startDate
+      + Date endDate
+      + Tariff tariff
+      + void activate()
+      + void cancel()
+      + void suspend()
+      + void extend()
+    }
+
+    class Promo {
+     + Int discount
+     + Date startDate
+     + Date endDate
+     + Tariff tariff
+     + void get()
+    }
+
+    class PromoBuilder {
+      + Date startPromoDate
+      + Date endPromoDate
+      + void setDiscount()
+      + void setStartPromoDate()
+      + void setEndPromoDate()
+      + Promo createPromo()
+    }
+
+    class TariffBuilder {
+      + Boolean setSmsServiceEnabled()
+      + Boolean setVideoServiceEnabled()
+      + Tariff createTariff()
+      + Tariff createTariff()
+    }
+Subscription "1" .. "1" Tariff : has
+Promo "1" .. "1" Tariff : has
+PromoBuilder "1" .. "1..*" Promo : create
+TariffBuilder "1" .. "1..*" Tariff : create
+
+@enduml

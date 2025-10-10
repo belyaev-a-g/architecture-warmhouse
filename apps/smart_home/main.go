@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,8 +30,13 @@ func main() {
 
 	// Initialize temperature service
 	temperatureAPIURL := getEnv("TEMPERATURE_API_URL", "http://temperature-api:8081")
+        log.Printf("temperatureAPIURL : %s\n", temperatureAPIURL)
 	temperatureService := services.NewTemperatureService(temperatureAPIURL)
 	log.Printf("Temperature service initialized with API URL: %s\n", temperatureAPIURL)
+
+        for _, env := range os.Environ() {
+            fmt.Println(env)
+        }
 
 	// Initialize router
 	router := gin.Default()

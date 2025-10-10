@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 )
@@ -38,6 +39,7 @@ func NewTemperatureService(baseURL string) *TemperatureService {
 // GetTemperature fetches temperature data for a specific location
 func (s *TemperatureService) GetTemperature(location string) (*TemperatureResponse, error) {
 	url := fmt.Sprintf("%s/temperature?location=%s", s.BaseURL, location)
+        println("location query = %s", url)
 
 	resp, err := s.HTTPClient.Get(url)
 	if err != nil {
@@ -59,8 +61,10 @@ func (s *TemperatureService) GetTemperature(location string) (*TemperatureRespon
 
 // GetTemperatureByID fetches temperature data for a specific sensor ID
 func (s *TemperatureService) GetTemperatureByID(sensorID string) (*TemperatureResponse, error) {
-	url := fmt.Sprintf("%s/temperature/%s", s.BaseURL, sensorID)
-
+	url := fmt.Sprintf("%s/temperature?sensor_id=%s", s.BaseURL, sensorID)
+        uri := fmt.Sprintf("%s/temperature", s.BaseURL)
+        checkConnection(uri)
+        println("sensor query = %s", url)
 	resp, err := s.HTTPClient.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching temperature data: %w", err)
@@ -77,4 +81,16 @@ func (s *TemperatureService) GetTemperatureByID(sensorID string) (*TemperatureRe
 	}
 
 	return &temperatureResp, nil
+}
+
+func checkConnection(URI string) {
+    // Проверка базового подключения
+    conn, err := net.DialTimeout("tcp", URI, 5*time.Second)
+    println("checkConnection = %s", URI)
+    if err != nil {
+        println("Connection failed: %v", err)
+        return
+    }
+    defer conn.Close()
+    println("Connection successful")
 }
