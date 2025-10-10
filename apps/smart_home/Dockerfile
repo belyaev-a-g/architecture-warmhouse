@@ -37,11 +37,18 @@ ENV HTTPS_PROXY=http://172.16.0.250:4343
 # Install necessary runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata
 
+# Add curl
+RUN apk add curl
+
 # Set working directory
 WORKDIR /app
 
 # Copy the binary from the builder stage
 COPY --from=builder /app/smarthome .
+
+# Unset proxy
+RUN unset HTTP_PROXY
+RUN unset HTTPS_PROXY
 
 # Expose the port the app runs on
 EXPOSE 8080

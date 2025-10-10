@@ -1,95 +1,72 @@
 from flask import Flask, request, jsonify
 import random
-from datetime import datetime
 
 app = Flask(__name__)
 
-# Mapping between location names and sensor IDs
-LOCATION_TO_SENSOR_ID = {
-    "Living Room": "1",
-    "Bedroom": "2",
-    "Kitchen": "3"
-}
+def get_default_location(sensor_id):
+    """Получить местоположение по умолчанию на основе sensorId"""
+    print("sensor_id = ", sensor_id)
+    if sensor_id == "1":
+        return "Living Room"
+    elif sensor_id == "2":
+        return "Bedroom"
+    elif sensor_id == "3":
+        return "Kitchen"
+    else:
+        return "Unknown"
 
-SENSOR_ID_TO_LOCATION = {
-    "1": "Living Room",
-    "2": "Bedroom",
-    "3": "Kitchen"
-}
-
-
-def generate_random_temperature():
-    """Generate a random temperature between 18 and 28 degrees Celsius"""
-    return round(random.uniform(18.0, 28.0), 2)
-
+def get_default_sensor_id(location):
+    """Получить sensorId по умолчанию на основе местоположения"""
+    if location == "Living Room":
+        return "1"
+    elif location == "Bedroom":
+        return "2"
+    elif location == "Kitchen":
+        return "3"
+    else:
+        return "0"
 
 @app.route('/temperature', methods=['GET'])
-def get_temperature_by_location():
-    """
-    Get temperature by location query parameter
-    Example: /temperature?location=Living Room
-    """
-    location = request.args.get('location', '')
-    sensor_id = request.args.get('sensorId', '')
+def get_temperature():
+    """Обработчик для получения температуры"""
+    # Получаем параметры из запроса
+    location = request.args.get('location', '').strip()
+    sensor_id = request.args.get('sensor_id', '').strip()
     
-    # If no location is provided, use a default based on sensor ID
-    if location == "" and sensor_id != "":
-        location = SENSOR_ID_TO_LOCATION.get(sensor_id, "Unknown")
+    # Если location не указан, используем значение по умолчанию на основе sensorId
+    if not location and sensor_id:
+        location = get_default_location(sensor_id)
     
-    # If no sensor ID is provided, generate one based on location
-    if sensor_id == "" and location != "":
-        sensor_id = LOCATION_TO_SENSOR_ID.get(location, "0")
+    # Если sensorId не указан, генерируем на основе location
+    if not sensor_id and location:
+        sensor_id = get_default_sensor_id(location)
     
-    # If both are empty, use defaults
-    if location == "" and sensor_id == "":
-        location = "Unknown"
-        sensor_id = "0"
+    # Если оба параметра не указаны, используем случайные значения
+    if not location and not sensor_id:
+        #locations = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office"]
+        #location = random.choice(locations)
+        #sensor_id = get_default_sensor_id(location)
+        sensor_id = 0
     
-    temperature = generate_random_temperature()
+    # Генерируем случайную температуру в диапазоне 15-30 градусов
+    temperature = random.randint(0, 30)
+
+    location = get_default_location(sensor_id)
     
+    # Формируем ответ
     response = {
-        "value": temperature,
-        "unit": "°C",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
         "location": location,
-        "status": "active",
-        "sensor_id": sensor_id,
-        "sensor_type": "temperature",
-        "description": f"Temperature reading for {location}"
+        "sensorId": sensor_id,
+        "temperature": temperature,
+        "unit": "Celsius"
     }
     
-    return jsonify(response), 200
-
-
-@app.route('/temperature/<sensor_id>', methods=['GET'])
-def get_temperature_by_id(sensor_id):
-    """
-    Get temperature by sensor ID
-    Example: /temperature/1
-    """
-    location = SENSOR_ID_TO_LOCATION.get(sensor_id, "Unknown")
-    temperature = generate_random_temperature()
-    
-    response = {
-        "value": temperature,
-        "unit": "°C",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "location": location,
-        "status": "active",
-        "sensor_id": sensor_id,
-        "sensor_type": "temperature",
-        "description": f"Temperature reading for {location}"
-    }
-    
-    return jsonify(response), 200
-
+    return jsonify(response)
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
-    return jsonify({"status": "ok"}), 200
-
+    """Проверка здоровья сервиса"""
+    return jsonify({"status": "healthy", "service": "temperature-api"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8081, debug=False)
-
+    app.run(host='0.0.0.0', port=8080, debug=True)
