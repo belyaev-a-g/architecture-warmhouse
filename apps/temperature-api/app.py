@@ -33,7 +33,6 @@ def get_temperature():
     # Получаем параметры из запроса
     location = request.args.get('location', '').strip()
     sensor_id = request.args.get('sensor_id', '').strip()
-    print("Is it works?")
     
     # Если location не указан, используем значение по умолчанию на основе sensorId
     if not location and sensor_id:
@@ -45,9 +44,6 @@ def get_temperature():
     
     # Если оба параметра не указаны, используем случайные значения
     if not location and not sensor_id:
-        #locations = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Office"]
-        #location = random.choice(locations)
-        #sensor_id = get_default_sensor_id(location)
         sensor_id = 0
     
     # Генерируем случайную температуру в диапазоне 15-30 градусов
@@ -55,7 +51,6 @@ def get_temperature():
 
     location = get_default_location(sensor_id)
     timestamp =  datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
-    print("timestamp = ", timestamp)
     
     # Формируем ответ
     response = {
