@@ -1,0 +1,16 @@
+@startuml
+!include C4/C4_Component.puml
+
+Title "Тёплый дом. Диаграмма контекста"
+Person(User, "Пользователь", "Управляет отоплением. Проверяет температуру")
+Person(Engineer, "Инженер", "Подключает датчики и устройства к системе")
+System(WarmHouse, "Теплый дом", "Система удаленного управления теплым домом")
+
+System_Ext(Devices, "Система отопления", "Управляет датчиками отопления")
+
+Rel(User, WarmHouse, "Управление")
+Rel(Engineer, WarmHouse,"Подключение")
+Rel(Engineer, Devices,"Подключение")
+Rel(WarmHouse, Devices, "Управляет датчиками и температурой")
+
+@enduml

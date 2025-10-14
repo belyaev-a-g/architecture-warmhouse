@@ -1,0 +1,39 @@
+@startuml
+!include ../C4/C4_Component.puml
+!include ../C4/C4_Container.puml
+
+Title "Тёплый дом. To be. Диаграмма контейнеров"
+System_Boundary(warmHouse, "Система 'Тёплый дом'") {
+Boundary(BackendApi, "Backend services") {
+Boundary(bff, "Backend for frontend") {
+  Container(BFF_WebSite, "Бекэнд для сайта", "Go")
+  Container(BFF_MobileApp, "Бекэнд для мобильного приложения", "Go")
+}
+  Container(Accounts, "Личный кабинет", "Go", "Управляет регистрацией, аутентификацией и данными пользователя. Подписка и платежи") {
+    Component(AuthController, "Управление авторизацией", "Авторизации и аутентификации пользователей")
+    Component(UserController, "Управление профилями пользователей", "Управление профилями пользователей")
+    Component(Tariffs, "Тарифы и акции", "Управление данными о тарифах, скидках и акциях")
+    Component(UserController, "Управление профилями пользователей", "Управление профилями пользователей")
+    Component(NotificationLayer, "Слой доступа к уведомлениям", "Взаимодействие с сервисом уведомлений")
+    Component(DataBaseLayer, "Слой доступа к данным", "Взаимодействие с БД")
+    Component(TransactionLayer, "Слой доступа к платежному сервису", "Взаимодействие с платежной системой")
+  }
+  ContainerDb(AccountsDb, "База данных личного кабинета", "PostgreSQL", "Хранение пользовательской регистрационной информации, журналы, подписки и платежи")
+  Container(PaymentService, "Платёжный сервис", "Go", "Управление оплатой, тарифами, подписками")
+  Container(Notification, "Сервис уведомлений", "Go", "PUSH/SMS/E-MAIL уведомления")
+}
+}
+
+Rel(bff, Accounts, "Управление личным кабинетом")
+Rel(Tariffs, UserController, "Данные о тарифах, акциях, скидках")
+Rel(AuthController, UserController, "Авторизации и аутентификации пользователей")
+Rel(AuthController, DataBaseLayer, "Чтение/запись данных")
+Rel(UserController, DataBaseLayer, "Чтение/запись данных")
+Rel(UserController, TransactionLayer, "Чтение/запись данных")
+Rel(UserController, NotificationLayer, "Отправка уведомлений")
+Rel(TransactionLayer, PaymentService, "Платёжные транзакции")
+Rel(NotificationLayer, Notification, "Отправка уведомлений")
+Rel(DataBaseLayer, AccountsDb, "Чтение/запись данных")
+Rel(Tariffs, DataBaseLayer, "Чтение/запись данных")
+
+@enduml

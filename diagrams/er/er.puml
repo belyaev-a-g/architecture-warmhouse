@@ -1,0 +1,69 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+
+title ER-диаграмма «Тёплый дом»
+
+entity "Пользователь" as User {
+    * id : uuid <<PK, generated>>
+    --
+    login : text <<UK>>
+    password_hash : text
+    role : enum(admin, user)
+    name : text
+    email : text <<UK>>
+    phone : text
+}
+
+entity "Подписка" as Subscription{
+  *id : uuid <<PK>>
+  --
+  user_id : uuid <<FK>>
+  tariff : text
+  status : enum(active, suspend, canceled)
+  start_date : timestamptz
+  end_date : timestamptz
+}
+
+entity "Дом" as House {
+    * id : uuid <<PK, generated>>
+    --
+    name : text
+    address : text
+    user_id : number <<FK>>
+}
+
+entity "Устройство" as Device {
+    * id : uuid <<PK, generated>>
+    --
+    house_id : uuid <<FK>>
+    name : text
+    status : enum
+    serial_number : text
+    --
+    model_id : number <<FK>>
+    type_id : number <<FK>>
+}
+
+entity "Тип устройства" as DeviceType {
+    * id : uuid <<PK, generated>>
+    --
+    name: text
+}
+
+entity "Телеметрия" as TelemetryData {
+    * id : uuid <<PK, generated>>
+    --
+    device_id : uuid <<FK>>
+    timestamp : datetime
+    data : text
+}
+
+User ||--o{ House : "владеет домами"
+User ||--o{ Subscription : "покупает подписки"
+House ||--o{ Device : "обслуживается устройствами"
+Device }o--|| DeviceType : "относится к типу"
+Device ||--o{ TelemetryData : "отправляет телеметрию"
+
+@enduml
