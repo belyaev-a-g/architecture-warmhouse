@@ -54,15 +54,14 @@ def get_temperature():
     temperature = random.randint(0, 30)
 
     location = get_default_location(sensor_id)
-    timestamp =  datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    timestamp =  datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
     print("timestamp = ", timestamp)
     
     # Формируем ответ
     response = {
         "value": temperature,
         "unit": "Celsius",
-        #"timestamp": timestamp,
-        "timestamp": "2025-10-14T11:01:51",
+        "timestamp": timestamp,
         "location": location,
         "status": "active",
         "sensor_id": sensor_id
