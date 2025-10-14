@@ -13,12 +13,6 @@ COPY go.mod go.sum ./
 ENV HTTP_PROXY=http://172.16.0.250:4343
 ENV HTTPS_PROXY=http://172.16.0.250:4343
 
-# Прокси для Go modules
-ENV GOPROXY=https://proxy.golang.org,direct
-
-# Отключение проверки сертификатов (если прокси использует самоподписанные сертификаты)
-ENV GIT_SSL_NO_VERIFY=1
-
 # Download dependencies
 RUN go mod download
 
@@ -36,9 +30,6 @@ ENV HTTPS_PROXY=http://172.16.0.250:4343
 
 # Install necessary runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata
-
-# Add curl
-RUN apk add curl
 
 # Set working directory
 WORKDIR /app
