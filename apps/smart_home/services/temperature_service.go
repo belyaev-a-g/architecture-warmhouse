@@ -66,6 +66,7 @@ func (s *TemperatureService) GetTemperatureByID(sensorID string) (*TemperatureRe
         //checkConnection(uri)
         println("sensor query = %s", url)
 	resp, err := s.HTTPClient.Get(url)
+        println("response query = %s", resp)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching temperature data: %w", err)
 	}

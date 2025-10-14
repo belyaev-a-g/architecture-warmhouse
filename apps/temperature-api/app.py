@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import random
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -32,6 +33,7 @@ def get_temperature():
     # Получаем параметры из запроса
     location = request.args.get('location', '').strip()
     sensor_id = request.args.get('sensor_id', '').strip()
+    print("Is it works?")
     
     # Если location не указан, используем значение по умолчанию на основе sensorId
     if not location and sensor_id:
@@ -52,13 +54,18 @@ def get_temperature():
     temperature = random.randint(0, 30)
 
     location = get_default_location(sensor_id)
+    timestamp =  datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    print("timestamp = ", timestamp)
     
     # Формируем ответ
     response = {
+        "value": temperature,
+        "unit": "Celsius",
+        #"timestamp": timestamp,
+        "timestamp": "2025-10-14T11:01:51",
         "location": location,
-        "sensorId": sensor_id,
-        "temperature": temperature,
-        "unit": "Celsius"
+        "status": "active",
+        "sensor_id": sensor_id
     }
     
     return jsonify(response)

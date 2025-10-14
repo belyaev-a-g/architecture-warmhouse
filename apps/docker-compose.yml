@@ -30,33 +30,6 @@ services:
     networks:
       - smarthome-network
 
-  temperature-client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: temperature-client
-    depends_on:
-      temperature-api:
-        condition: service_started
-    networks:
-      - smarthome-network
-    environment:
-      - API_URL=http://temperature-api:5000
-
-
-  temperature-client-go:
-    build:
-      context: ./go_client
-      dockerfile: Dockerfile
-    container_name: temperature-client-go
-    depends_on:
-      temperature-api:
-        condition: service_started
-    networks:
-      - smarthome-network
-    environment:
-      - API_URL=http://temperature-api:5000
-
   app:
     build:
       context: ./smart_home
