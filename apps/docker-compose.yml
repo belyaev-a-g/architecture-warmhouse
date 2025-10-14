@@ -26,9 +26,36 @@ services:
       dockerfile: Dockerfile
     container_name: temperature-api
     ports:
-      - "8081:8080"
+      - "5000:5000"
     networks:
       - smarthome-network
+
+  temperature-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: temperature-client
+    depends_on:
+      temperature-api:
+        condition: service_started
+    networks:
+      - smarthome-network
+    environment:
+      - API_URL=http://temperature-api:5000
+
+
+  temperature-client-go:
+    build:
+      context: ./go_client
+      dockerfile: Dockerfile
+    container_name: temperature-client-go
+    depends_on:
+      temperature-api:
+        condition: service_started
+    networks:
+      - smarthome-network
+    environment:
+      - API_URL=http://temperature-api:5000
 
   app:
     build:
@@ -42,7 +69,7 @@ services:
         condition: service_started
     environment:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
-      - TEMPERATURE_API_URL=http://172.28.4.31:8081
+      - TEMPERATURE_API_URL=http://temperature-api:5000
     ports:
       - "8080:8080"
     restart: unless-stopped

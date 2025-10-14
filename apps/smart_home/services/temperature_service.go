@@ -62,8 +62,8 @@ func (s *TemperatureService) GetTemperature(location string) (*TemperatureRespon
 // GetTemperatureByID fetches temperature data for a specific sensor ID
 func (s *TemperatureService) GetTemperatureByID(sensorID string) (*TemperatureResponse, error) {
 	url := fmt.Sprintf("%s/temperature?sensor_id=%s", s.BaseURL, sensorID)
-        uri := fmt.Sprintf("%s/temperature", s.BaseURL)
-        checkConnection(uri)
+        //uri := fmt.Sprintf("%s/temperature", s.BaseURL)
+        //checkConnection(uri)
         println("sensor query = %s", url)
 	resp, err := s.HTTPClient.Get(url)
 	if err != nil {

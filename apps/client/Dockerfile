@@ -14,7 +14,7 @@ RUN pip install --proxy 172.16.0.250:4343 --no-cache-dir -r requirements.txt
 COPY app.py .
 
 # Expose port 8080
-EXPOSE 5000
+#EXPOSE 8080
 
 # Run the application
 CMD ["python", "app.py"]
